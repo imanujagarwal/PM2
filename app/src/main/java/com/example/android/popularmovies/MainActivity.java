@@ -77,6 +77,10 @@ public class MainActivity extends AppCompatActivity {
 
         movieAdapter = new MovieAdapter(this, gridItemList);
 
+        if(movieAdapter!=null){
+            recyclerview.setAdapter(movieAdapter);
+        }
+
 
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
         recyclerview.setLayoutManager(gridLayoutManager);
@@ -140,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
 
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
+            String[] sArray = null;
 
             String movieJsonString = null;
 
@@ -151,7 +156,7 @@ public class MainActivity extends AppCompatActivity {
                         .appendQueryParameter(PAGE, params[1])
                         .build();
 
-                Log.i(TAG, "doInBackground: "+buildUri.toString());
+                String test = buildUri.toString();
 
                 URL url = new URL(buildUri.toString());
 
@@ -198,21 +203,18 @@ public class MainActivity extends AppCompatActivity {
             }
 
             try {
-                getMovieInfoFromJson(movieJsonString);
+                sArray = getMovieInfoFromJson(movieJsonString);
             } catch (JSONException e) {
                 //Log.e(LOG_TAG, e.getMessage());
                 e.printStackTrace();
             }
-            return null;
+            return sArray;
         }
 
         @Override
         protected void onPostExecute(String[] strings) {
             View pb = findViewById(R.id.loading_indicator);
             pb.setVisibility(View.GONE);
-            if(movieAdapter!=null){
-                recyclerview.setAdapter(movieAdapter);
-            }
             movieAdapter.notifyDataSetChanged();
             task = null;
         }
@@ -254,7 +256,8 @@ public class MainActivity extends AppCompatActivity {
                             movieAdapter.clear();
                             Log.i(TAG, "onItemSelected: "+"TOP");
                             selectedType = "top_rated";
-                            new FetchMovieInfo().execute("top_rated",page+"");
+                            task = new FetchMovieInfo();
+                            task.execute("top_rated",page+"");
                             break;
                         }
                 }

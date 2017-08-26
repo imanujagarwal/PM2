@@ -75,14 +75,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.Viewholder>{
     }
 
     public void clear() {
-        int size = this.mGridItemList.size();
-        if (size > 0) {
-            for (int i = 0; i < size; i++) {
-                this.mGridItemList.remove(0);
-            }
-
-            this.notifyItemRangeRemoved(0, size);
-        }
+        mGridItemList.clear();
     }
 
     public class Viewholder extends RecyclerView.ViewHolder {
