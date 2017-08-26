@@ -3,6 +3,7 @@
     <string-array name="movieTypes_array">
         <item>Popular</item>
         <item>Top Rated</item>
+        <item>Favorites</item>
 
 
     </string-array>

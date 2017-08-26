@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+<ScrollView android:layout_height="match_parent"
+    android:id="@+id/scrollView"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools = "http://schemas.android.com/tools"
     android:orientation="vertical" android:layout_width="match_parent"
@@ -60,20 +71,90 @@
     <TextView
         android:id="@+id/textView_moviename"
         android:layout_marginTop="16dp"
-        android:textSize="24dp"
+        android:textSize="24sp"
         android:layout_marginLeft="16dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
 
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/textview_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"/>
+
+    </ScrollView>
 
     <TextView
-        android:id="@+id/textview_description"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginLeft="16dp" />
+        android:layout_height="1dp"
+        android:background="@color/colorPrimaryDark"
+        android:layout_marginTop="10dp"/>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_marginLeft="16dp"
+            android:text="Trailers"
+            android:textSize="24sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/trailer1"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="20dp"
+            android:text="Trailer 1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/trailer2"
+            android:layout_marginLeft="16dp"
+            android:layout_marginTop="20dp"
+            android:text="Trailer 2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <TextView
+        android:text="Reviews"
+        android:textSize="24sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:id="@+id/reviews"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"></LinearLayout>
 
 
 
 </LinearLayout>
+
+</ScrollView>
+
+<android.support.design.widget.FloatingActionButton
+    app:layout_anchorGravity="bottom|right|end"
+    app:layout_anchor="@id/scrollView"
+    android:src="@mipmap/ic_star_unfilled"
+    android:layout_marginRight="20dp"
+    android:layout_marginBottom="10dp"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content" />
+
+</android.support.design.widget.CoordinatorLayout>

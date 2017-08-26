@@ -6,6 +6,9 @@ import android.os.AsyncTask;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,6 +32,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.android.popularmovies.R.id.rv_movies;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -37,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private int page = 1;
     MovieAdapter movieAdapter;
     List<GridItem> gridItemList;
-    GridView gridView;
+    RecyclerView recyclerview;
+    String selectedType = "popular";
 
     private String KEY = "api_key"; //Do not change this value, key must be defined on strings.xml
     private String RESULTS = "results";
@@ -48,38 +53,50 @@ public class MainActivity extends AppCompatActivity {
     private String MOVIE_RELEASE_DATE = "release_date";
     private String PAGE = "page";
     private String pageNumber = "";
+    private String MOVIE_ID = "id";
 
     public static final String TAG = "MyActivity";
     public FetchMovieInfo task = null;
+
+    private EndlessScrollListener scrollListener;
+
 
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+        Log.i(TAG, "onCreate: ");
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        gridView = (GridView) findViewById(R.id.gridView);
-        gridItemList = new ArrayList<>();
+        recyclerview = (RecyclerView) findViewById(rv_movies);
+        gridItemList = new ArrayList<GridItem>();
 
 
-        movieAdapter = new MovieAdapter(this, R.layout.grid_view_item, gridItemList);
+        movieAdapter = new MovieAdapter(this, gridItemList);
 
 
-        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 2);
+        recyclerview.setLayoutManager(gridLayoutManager);
+
+        scrollListener = new EndlessScrollListener(gridLayoutManager) {
             @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent intent = new Intent(getApplicationContext(),DetailActivity.class);
-                intent.putExtra(MOVIE_NAME,gridItemList.get(i).getmTitle());
-                intent.putExtra(MOVIE_IMAGE,gridItemList.get(i).getmImageUrlSuffix());
-                intent.putExtra(MOVIE_SYNOPSIS,gridItemList.get(i).getmOverview());
-                intent.putExtra(MOVIE_RATING,gridItemList.get(i).getmRating());
-                intent.putExtra(MOVIE_RELEASE_DATE,gridItemList.get(i).getmReleaseDate());
-                Log.i(TAG, "onItemClick: VALUES "+gridItemList.get(i).getmTitle());
-                startActivity(intent);
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to the bottom of the list
+                loadnextdatafromApi(page);
             }
-        });
+        };
+
+        recyclerview.addOnScrollListener(scrollListener);
+
+    }
+
+    public void loadnextdatafromApi(int page){
+        new FetchMovieInfo().execute(selectedType, page+"");
+
     }
 
 
@@ -101,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
                 String synopsis;
                 double rating;
                 String released;
+                String movieId;
 
                 JSONObject movie = moviesArray.getJSONObject(i);
                 name = movie.getString(MOVIE_NAME);
@@ -108,8 +126,9 @@ public class MainActivity extends AppCompatActivity {
                 synopsis = movie.getString(MOVIE_SYNOPSIS);
                 rating = movie.getDouble(MOVIE_RATING);
                 released = movie.getString(MOVIE_RELEASE_DATE);
+                movieId = movie.getString(MOVIE_ID);
 
-                gridItemList.add(new GridItem(posterPath, name, synopsis, rating, released));
+                gridItemList.add(new GridItem(posterPath, name, synopsis, rating, released, movieId));
 
             }
 
@@ -129,15 +148,18 @@ public class MainActivity extends AppCompatActivity {
                         .buildUpon()
                         .appendPath(params[0])
                         .appendQueryParameter(KEY, getResources().getString(R.string.api_key))
-                        .appendQueryParameter(PAGE, pageNumber)
+                        .appendQueryParameter(PAGE, params[1])
                         .build();
 
+                Log.i(TAG, "doInBackground: "+buildUri.toString());
+
                 URL url = new URL(buildUri.toString());
-                Log.v(LOG_TAG, "Build result: " + buildUri.toString());
 
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
+
+                URL url_video = new URL(buildUri.toString());
 
                 InputStream inputStream = urlConnection.getInputStream();
                 StringBuffer stringBuffer = new StringBuffer();
@@ -189,8 +211,9 @@ public class MainActivity extends AppCompatActivity {
             View pb = findViewById(R.id.loading_indicator);
             pb.setVisibility(View.GONE);
             if(movieAdapter!=null){
-                gridView.setAdapter(movieAdapter);
+                recyclerview.setAdapter(movieAdapter);
             }
+            movieAdapter.notifyDataSetChanged();
             task = null;
         }
     }
@@ -198,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        Log.i(TAG, "onCreateOptionsMenu: ");
+//        Log.i(TAG, "onCreateOptionsMenu: ");
 
         MenuItem item = menu.findItem(R.id.menu_spinner);
         final Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
@@ -216,10 +239,12 @@ public class MainActivity extends AppCompatActivity {
 
                 switch (i){
                     case 0:
+                        Log.i(TAG, "onItemSelected: "+"POPULAR");
                         if(task == null){
                             movieAdapter.clear();
+                            selectedType = selectedItem;
                             task = new FetchMovieInfo();
-                            task.execute(selectedItem);
+                            task.execute(selectedItem,page+"");
                             break;
 
                         }
@@ -227,7 +252,9 @@ public class MainActivity extends AppCompatActivity {
                     case 1:
                         if(task == null){
                             movieAdapter.clear();
-                            new FetchMovieInfo().execute("top_rated");
+                            Log.i(TAG, "onItemSelected: "+"TOP");
+                            selectedType = "top_rated";
+                            new FetchMovieInfo().execute("top_rated",page+"");
                             break;
                         }
                 }

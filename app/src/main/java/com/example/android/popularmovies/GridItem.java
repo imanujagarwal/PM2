@@ -11,18 +11,22 @@ public class GridItem {
     private String mOverview;
     private double mRating;
     private String mReleaseDate;
+    private String mMovieId;
 
-    public GridItem(String mImageUrlSuffix, String mTitle, String mOverview, double mRating, String mReleaseDate) {
+    public GridItem(String mImageUrlSuffix, String mTitle, String mOverview, double mRating, String mReleaseDate, String mMovieId) {
         this.mImageUrlSuffix = mImageUrlSuffix;
         this.mTitle = mTitle;
         this.mOverview = mOverview;
         this.mRating = mRating;
         this.mReleaseDate = mReleaseDate;
+        this.mMovieId = mMovieId;
     }
 
     public String getmImageUrlSuffix() {
         return mImageUrlSuffix;
     }
+
+    public String getmMovieId(){return mMovieId;}
 
     public void setmImageUrlSuffix(String mImageView_id) {
         this.mImageUrlSuffix = mImageUrlSuffix;
