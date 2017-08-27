@@ -110,6 +110,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.Viewholder>{
 
         Picasso.with(context)
                 .load(Url)
+                .placeholder(R.mipmap.placeholder)
+                .error(R.drawable.error2)
+                .fit()
                 .into(holder.moviePoster);
 
         holder.moviePoster.setOnClickListener(new View.OnClickListener() {

@@ -1,10 +1,12 @@
 package com.example.android.popularmovies;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -28,7 +30,6 @@ import java.net.URL;
  */
 
 public class DetailActivity extends AppCompatActivity {
-
 
     private String MOVIE_NAME = "title";
     private String MOVIE_IMAGE = "poster_path";
@@ -54,6 +55,7 @@ public class DetailActivity extends AppCompatActivity {
         String MovieId = i.getStringExtra("id");
         String ImageSuffix = i.getStringExtra(MOVIE_IMAGE);
         String ImageURL = BASE_URL+ImageSuffix;
+        Log.i("TAG", "ImageURL: "+ImageURL);
 
         getSupportActionBar().setTitle(MovieName);
 
@@ -72,7 +74,12 @@ public class DetailActivity extends AppCompatActivity {
         TextView tvReleaseDate = (TextView) findViewById(R.id.textview_release_date);
         tvReleaseDate.setText(MovieReleaseDate);
 
-        Picasso.with(this).load(ImageURL).into(imageView_artwork);
+        Picasso.with(this)
+                .load(ImageURL)
+                .placeholder(R.drawable.placeholder)
+                .fit()
+                .into(imageView_artwork);
+
         TextView textView_summary = (TextView)findViewById(R.id.textview_description);
         textView_summary.setText(MovieSynopsis);
 

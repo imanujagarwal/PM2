@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
                 // Triggered only when new data needs to be appended to the list
                 // Add whatever code is needed to append new items to the bottom of the list
+                Log.i(TAG, "onLoadMore - PAGE NO: "+page);
                 loadnextdatafromApi(page);
             }
         };
@@ -99,7 +100,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void loadnextdatafromApi(int page){
-        new FetchMovieInfo().execute(selectedType, page+"");
+        if(task == null) {
+            task = new FetchMovieInfo();
+            task.execute(selectedType, page + "");
+        }
 
     }
 
@@ -157,6 +161,7 @@ public class MainActivity extends AppCompatActivity {
                         .build();
 
                 String test = buildUri.toString();
+                Log.i(TAG, "URI: " +test);
 
                 URL url = new URL(buildUri.toString());
 
