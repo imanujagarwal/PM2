@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -111,6 +112,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.Viewholder>{
         Picasso.with(context)
                 .load(Url)
                 .placeholder(R.mipmap.placeholder)
+                .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
                 .error(R.drawable.error2)
                 .fit()
                 .into(holder.moviePoster);
