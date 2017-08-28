@@ -42,14 +42,16 @@ import static com.example.android.popularmovies.R.id.rv_movies;
 
 public class MovieFragment extends Fragment {
 
-    private int page = 1;
     MovieAdapter movieAdapter;
     List<GridItem> gridItemList;
     RecyclerView recyclerview;
-    String selectedType = "popular";
+    int selectedIndex =  -1;
+    String selectedType = "";
     public FetchMovieInfo task = null;
     private EndlessScrollListener scrollListener;
     View view;
+
+
 
 
     @Nullable
@@ -58,7 +60,11 @@ public class MovieFragment extends Fragment {
 
         view = inflater.inflate(R.layout.activity_main,container,false);
         setHasOptionsMenu(true);
-        setRetainInstance(true);
+//        setRetainInstance(true);
+
+
+
+
 
         recyclerview = (RecyclerView) view.findViewById(rv_movies);
         gridItemList = new ArrayList<GridItem>();
@@ -86,8 +92,21 @@ public class MovieFragment extends Fragment {
 
         recyclerview.addOnScrollListener(scrollListener);
 
+        if(savedInstanceState!=null){
+            int tmp = savedInstanceState.getInt("MOVIE_CATEGORY");
+            selectedIndex = tmp;
+
+        }
+
         return view;
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("MOVIE_CATEGORY", selectedIndex);
+    }
+
 
     public void loadnextdatafromApi(int page){
         if(task == null) {
@@ -104,7 +123,7 @@ public class MovieFragment extends Fragment {
 //          Log.i(TAG, "onCreateOptionsMenu: ");
 
             MenuItem item = menu.findItem(R.id.menu_spinner);
-            final Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+            Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
 
             final ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                     R.array.movieTypes_array, android.R.layout.simple_spinner_item);
@@ -112,19 +131,22 @@ public class MovieFragment extends Fragment {
 
             spinner.setAdapter(adapter);
 
+
+            if(selectedIndex!=-1)
+                spinner.setSelection(selectedIndex);
+
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                    String selectedItem = spinner.getSelectedItem().toString().toLowerCase();
+//                    selectedItem = spinner.getSelectedItem().toString().toLowerCase().replaceAll("\\s","");
 
                     switch (i){
                         case 0:
-                            Log.i(TAG, "onItemSelected: "+"POPULAR");
                             if(task == null){
                                 movieAdapter.clear();
-                                selectedType = selectedItem;
                                 task = new FetchMovieInfo();
-                                task.execute(selectedItem,page+"");
+                                selectedIndex = 0; selectedType = "popular";
+                                task.execute("popular","1");
                                 break;
 
                             }
@@ -132,10 +154,9 @@ public class MovieFragment extends Fragment {
                         case 1:
                             if(task == null){
                                 movieAdapter.clear();
-                                Log.i(TAG, "onItemSelected: "+"TOP");
-                                selectedType = "top_rated";
                                 task = new FetchMovieInfo();
-                                task.execute("top_rated",page+"");
+                                selectedIndex = 1; selectedType = "top_rated";
+                                task.execute("top_rated","1");
                                 break;
                             }
                     }

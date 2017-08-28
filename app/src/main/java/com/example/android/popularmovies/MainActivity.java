@@ -47,6 +47,8 @@ public class MainActivity extends AppCompatActivity {
 
         ActivityHelper.setLocalContext(this);
 
-        getSupportFragmentManager().beginTransaction().add(R.id.frag_container,new MovieFragment(), "s").commit();
+        if(getSupportFragmentManager().findFragmentById(R.id.frag_container) == null){
+            getSupportFragmentManager().beginTransaction().replace(R.id.frag_container,new MovieFragment(), "s").commit();
+        }
     }
 }
