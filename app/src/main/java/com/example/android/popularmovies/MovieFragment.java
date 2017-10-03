@@ -1,10 +1,13 @@
 package com.example.android.popularmovies;
 
+import android.content.res.Configuration;
+import android.database.Cursor;
+import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -18,6 +21,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+
+import com.example.android.popularmovies.Data.MovieContract;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.Inflater;
 
+import static android.R.attr.rating;
 import static android.content.ContentValues.TAG;
 import static com.example.android.popularmovies.R.id.rv_movies;
 
@@ -50,6 +56,7 @@ public class MovieFragment extends Fragment {
     public FetchMovieInfo task = null;
     private EndlessScrollListener scrollListener;
     View view;
+    GridLayoutManager gridLayoutManager;
 
 
 
@@ -76,9 +83,15 @@ public class MovieFragment extends Fragment {
             recyclerview.setAdapter(movieAdapter);
         }
 
+        if(getActivity().getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+            gridLayoutManager = new GridLayoutManager(getActivity(), 2);
+            recyclerview.setLayoutManager(gridLayoutManager);
+        }
+        else{
+            gridLayoutManager = new GridLayoutManager(getActivity(), 3);
+            recyclerview.setLayoutManager(gridLayoutManager);
+        }
 
-        GridLayoutManager gridLayoutManager = new GridLayoutManager(getActivity(), 2);
-        recyclerview.setLayoutManager(gridLayoutManager);
 
         scrollListener = new EndlessScrollListener(gridLayoutManager) {
             @Override
@@ -86,30 +99,38 @@ public class MovieFragment extends Fragment {
                 // Triggered only when new data needs to be appended to the list
                 // Add whatever code is needed to append new items to the bottom of the list
                 Log.i(TAG, "onLoadMore - PAGE NO: "+page);
+                if(selectedType == "fav")
+                    return;
                 loadnextdatafromApi(page);
             }
         };
 
         recyclerview.addOnScrollListener(scrollListener);
 
-        if(savedInstanceState!=null){
-            int tmp = savedInstanceState.getInt("MOVIE_CATEGORY");
-            selectedIndex = tmp;
 
-        }
 
         return view;
     }
 
+    public final static String LIST_STATE_KEY = "recycler_list_state";
+    Parcelable listState;
+
+
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putInt("MOVIE_CATEGORY", selectedIndex);
+    public void onResume() {
+        super.onResume();
+        if(selectedType == "fav"){
+            movieAdapter.clear();
+            LoadFavorites();
+        }
+
     }
 
 
+
+
     public void loadnextdatafromApi(int page){
-        if(task == null) {
+        if(task == null && page < 25) {
             task = new FetchMovieInfo();
             task.execute(selectedType, page + "");
         }
@@ -132,8 +153,7 @@ public class MovieFragment extends Fragment {
             spinner.setAdapter(adapter);
 
 
-            if(selectedIndex!=-1)
-                spinner.setSelection(selectedIndex);
+
 
             spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
@@ -159,6 +179,17 @@ public class MovieFragment extends Fragment {
                                 task.execute("top_rated","1");
                                 break;
                             }
+
+                        case 2:{
+
+                            movieAdapter.clear();
+                            selectedType = "fav";
+                            LoadFavorites();
+                            movieAdapter.notifyDataSetChanged();
+                            break;
+
+                        }
+
                     }
                 }
 
@@ -170,6 +201,38 @@ public class MovieFragment extends Fragment {
 
 
         }
+
+
+
+    public void LoadFavorites(){
+        String[] projection = {MovieContract.FavoriteMovies.COLUMN_MOVIE_ID,
+                MovieContract.FavoriteMovies.COLUMN_POSTER_PATH,
+                MovieContract.FavoriteMovies.COLUMN_RELEASE_DATE,
+                MovieContract.FavoriteMovies.COLUMN_OVERVIEW,
+                MovieContract.FavoriteMovies.COLUMN_TITLE,
+                MovieContract.FavoriteMovies.COLUMN_VOTE_AVERAGE
+        };
+        Cursor cursor = getContext().getContentResolver().query(MovieContract.FavoriteMovies.CONTENT_URI,
+                projection,
+                null,
+                null,
+                null,
+                null);
+
+        cursor.moveToFirst();
+
+        do{
+            String posterPath = cursor.getString(cursor.getColumnIndex(MovieContract.FavoriteMovies.COLUMN_POSTER_PATH));
+            String name = cursor.getString(cursor.getColumnIndex(MovieContract.FavoriteMovies.COLUMN_TITLE));
+            String synopsis = cursor.getString(cursor.getColumnIndex(MovieContract.FavoriteMovies.COLUMN_OVERVIEW));
+            Double rating = cursor.getDouble(cursor.getColumnIndex(MovieContract.FavoriteMovies.COLUMN_VOTE_AVERAGE));
+            String releaseDate = cursor.getString(cursor.getColumnIndex(MovieContract.FavoriteMovies.COLUMN_RELEASE_DATE));
+            String movieId = cursor.getString(cursor.getColumnIndex(MovieContract.FavoriteMovies.COLUMN_MOVIE_ID));
+            gridItemList.add(new GridItem(posterPath,name,synopsis,rating,releaseDate,movieId));
+        }while (cursor.moveToNext());
+        movieAdapter.notifyDataSetChanged();
+    }
+
 
 
     public class FetchMovieInfo extends AsyncTask<String, Void, String[]> {
@@ -205,6 +268,10 @@ public class MovieFragment extends Fragment {
                 JSONObject movie = moviesArray.getJSONObject(i);
                 name = movie.getString(MOVIE_NAME);
                 posterPath = movie.getString(MOVIE_IMAGE);
+                if(posterPath == "null" || posterPath.isEmpty()){
+                    i--;
+                    continue;
+                }
                 synopsis = movie.getString(MOVIE_SYNOPSIS);
                 rating = movie.getDouble(MOVIE_RATING);
                 released = movie.getString(MOVIE_RELEASE_DATE);
@@ -216,6 +283,8 @@ public class MovieFragment extends Fragment {
 
             return resultsStr;
         }
+
+
 
         @Override
         protected String[] doInBackground(String... params) {

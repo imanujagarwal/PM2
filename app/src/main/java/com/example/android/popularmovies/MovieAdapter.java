@@ -2,30 +2,18 @@ package com.example.android.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
-import android.text.LoginFilter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
+import com.example.android.popularmovies.Activities.DetailActivity;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.Inflater;
 
 import static android.content.ContentValues.TAG;
 import static android.media.CamcorderProfile.get;
@@ -106,6 +94,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.Viewholder>{
     @Override
     public void onBindViewHolder(Viewholder holder, final int position) {
         GridItem gridItem = mGridItemList.get(position);
+
+        Log.i(TAG, "onBindViewHolder: POSITION" +position);
 
         String Url = BuildImageUrl(gridItem.getmImageUrlSuffix());
 
