@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,6 +23,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import com.example.android.popularmovies.Adapters.MovieAdapter;
 import com.example.android.popularmovies.Data.MovieContract;
 
 import org.json.JSONArray;
@@ -36,10 +38,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.Inflater;
 
-import static android.R.attr.rating;
 import static android.content.ContentValues.TAG;
+import static com.example.android.popularmovies.R.id.menu_spinner;
 import static com.example.android.popularmovies.R.id.rv_movies;
 
 /**
@@ -57,8 +58,10 @@ public class MovieFragment extends Fragment {
     private EndlessScrollListener scrollListener;
     View view;
     GridLayoutManager gridLayoutManager;
-
-
+    Spinner spinner;
+    int spinnerState;
+    private static final String RECYCLER_VIEW_POSITION_KEY = "rv_position_key";
+    Parcelable listState;
 
 
     @Nullable
@@ -69,8 +72,8 @@ public class MovieFragment extends Fragment {
         setHasOptionsMenu(true);
 //        setRetainInstance(true);
 
-
-
+        if(savedInstanceState!=null)
+            listState=savedInstanceState.getParcelable(RECYCLER_VIEW_POSITION_KEY);
 
 
         recyclerview = (RecyclerView) view.findViewById(rv_movies);
@@ -90,6 +93,11 @@ public class MovieFragment extends Fragment {
         else{
             gridLayoutManager = new GridLayoutManager(getActivity(), 3);
             recyclerview.setLayoutManager(gridLayoutManager);
+        }
+
+        if(savedInstanceState!=null) {
+            spinnerState = savedInstanceState.getInt("yourSpinner");
+
         }
 
 
@@ -112,9 +120,11 @@ public class MovieFragment extends Fragment {
         return view;
     }
 
-    public final static String LIST_STATE_KEY = "recycler_list_state";
-    Parcelable listState;
-
+    @Override
+    public void onPause() {
+        super.onPause();
+//        saveRecyclerViewState();
+    }
 
     @Override
     public void onResume() {
@@ -124,8 +134,23 @@ public class MovieFragment extends Fragment {
             LoadFavorites();
         }
 
+
     }
 
+    private void restoreRecyclerViewState() {
+        Parcelable parcelable = getArguments().getParcelable(RECYCLER_VIEW_POSITION_KEY);
+        if (recyclerview.getLayoutManager() != null) {
+            recyclerview.getLayoutManager().onRestoreInstanceState(parcelable);
+        }
+    }
+
+    private void saveRecyclerViewState() {
+        if (recyclerview.getLayoutManager() != null) {
+            getArguments().putParcelable(
+                    RECYCLER_VIEW_POSITION_KEY, recyclerview.getLayoutManager().onSaveInstanceState()
+            );
+        }
+    }
 
 
 
@@ -133,7 +158,16 @@ public class MovieFragment extends Fragment {
         if(task == null && page < 25) {
             task = new FetchMovieInfo();
             task.execute(selectedType, page + "");
+
         }
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("yourSpinner", spinner.getSelectedItemPosition());
+        outState.putParcelable(RECYCLER_VIEW_POSITION_KEY, recyclerview.getLayoutManager().onSaveInstanceState());
 
     }
 
@@ -144,18 +178,19 @@ public class MovieFragment extends Fragment {
 //          Log.i(TAG, "onCreateOptionsMenu: ");
 
             MenuItem item = menu.findItem(R.id.menu_spinner);
-            Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+            spinner = (Spinner) MenuItemCompat.getActionView(item);
+
+
+
 
             final ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
                     R.array.movieTypes_array, android.R.layout.simple_spinner_item);
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
             spinner.setAdapter(adapter);
+            spinner.setSelection(spinnerState);
 
-
-
-
-            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                 @Override
                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 //                    selectedItem = spinner.getSelectedItem().toString().toLowerCase().replaceAll("\\s","");
@@ -206,6 +241,7 @@ public class MovieFragment extends Fragment {
 
     public void LoadFavorites(){
         String[] projection = {MovieContract.FavoriteMovies.COLUMN_MOVIE_ID,
+                MovieContract.FavoriteMovies.COLUMN_BACKDROP_PATH,
                 MovieContract.FavoriteMovies.COLUMN_POSTER_PATH,
                 MovieContract.FavoriteMovies.COLUMN_RELEASE_DATE,
                 MovieContract.FavoriteMovies.COLUMN_OVERVIEW,
@@ -220,17 +256,22 @@ public class MovieFragment extends Fragment {
                 null);
 
         cursor.moveToFirst();
+        if(cursor.getCount() == 0)
+            return;
 
         do{
             String posterPath = cursor.getString(cursor.getColumnIndex(MovieContract.FavoriteMovies.COLUMN_POSTER_PATH));
+            String backdropPath = cursor.getString(cursor.getColumnIndex(MovieContract.FavoriteMovies.COLUMN_BACKDROP_PATH));
             String name = cursor.getString(cursor.getColumnIndex(MovieContract.FavoriteMovies.COLUMN_TITLE));
             String synopsis = cursor.getString(cursor.getColumnIndex(MovieContract.FavoriteMovies.COLUMN_OVERVIEW));
             Double rating = cursor.getDouble(cursor.getColumnIndex(MovieContract.FavoriteMovies.COLUMN_VOTE_AVERAGE));
             String releaseDate = cursor.getString(cursor.getColumnIndex(MovieContract.FavoriteMovies.COLUMN_RELEASE_DATE));
             String movieId = cursor.getString(cursor.getColumnIndex(MovieContract.FavoriteMovies.COLUMN_MOVIE_ID));
-            gridItemList.add(new GridItem(posterPath,name,synopsis,rating,releaseDate,movieId));
+            gridItemList.add(new GridItem(backdropPath,posterPath,name,synopsis,rating,releaseDate,movieId));
         }while (cursor.moveToNext());
         movieAdapter.notifyDataSetChanged();
+        view.findViewById(R.id.loading_indicator).setVisibility(View.GONE);
+
     }
 
 
@@ -260,6 +301,7 @@ public class MovieFragment extends Fragment {
             for (int i = 0; i < moviesArray.length(); i++) {
                 String name;
                 String posterPath;
+                String backdropPath;
                 String synopsis;
                 double rating;
                 String released;
@@ -272,12 +314,13 @@ public class MovieFragment extends Fragment {
                     i--;
                     continue;
                 }
+                backdropPath = movie.getString(MovieContract.FavoriteMovies.COLUMN_BACKDROP_PATH);
                 synopsis = movie.getString(MOVIE_SYNOPSIS);
                 rating = movie.getDouble(MOVIE_RATING);
                 released = movie.getString(MOVIE_RELEASE_DATE);
                 movieId = movie.getString(MOVIE_ID);
 
-                gridItemList.add(new GridItem(posterPath, name, synopsis, rating, released, movieId));
+                gridItemList.add(new GridItem(backdropPath,posterPath, name, synopsis, rating, released, movieId));
 
             }
 
@@ -364,6 +407,7 @@ public class MovieFragment extends Fragment {
             View pb = view.findViewById(R.id.loading_indicator);
             pb.setVisibility(View.GONE);
             movieAdapter.notifyDataSetChanged();
+            recyclerview.getLayoutManager().onRestoreInstanceState(listState);
             task = null;
         }
     }

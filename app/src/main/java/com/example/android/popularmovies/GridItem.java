@@ -7,19 +7,29 @@ package com.example.android.popularmovies;
 public class GridItem {
 
     private String mImageUrlSuffix;
+    private String backdropImageSuffix;
     private String mTitle;
     private String mOverview;
     private double mRating;
     private String mReleaseDate;
     private String mMovieId;
 
-    public GridItem(String mImageUrlSuffix, String mTitle, String mOverview, double mRating, String mReleaseDate, String mMovieId) {
+    public GridItem(String backdropImageSuffix,String mImageUrlSuffix, String mTitle, String mOverview, double mRating, String mReleaseDate, String mMovieId) {
+        this.backdropImageSuffix = backdropImageSuffix;
         this.mImageUrlSuffix = mImageUrlSuffix;
         this.mTitle = mTitle;
         this.mOverview = mOverview;
         this.mRating = mRating;
         this.mReleaseDate = mReleaseDate;
         this.mMovieId = mMovieId;
+    }
+
+    public String getBackdropImageSuffix() {
+        return backdropImageSuffix;
+    }
+
+    public void setBackdropImageSuffix(String backdropImageSuffix) {
+        this.backdropImageSuffix = backdropImageSuffix;
     }
 
     public String getmImageUrlSuffix() {

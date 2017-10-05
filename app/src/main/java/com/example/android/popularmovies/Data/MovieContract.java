@@ -25,6 +25,7 @@ public class MovieContract {
         public static final String TABLE_NAME = "favorites";
 
         public static final String COLUMN_MOVIE_ID = "movie_id";
+        public static final String COLUMN_BACKDROP_PATH = "backdrop_path";
         public static final String COLUMN_POPULAR_INDEX = "popular_index";
         public static final String COLUMN_TOP_RATED_INDEX = "top_rated_index";
         public static final String COLUMN_OVERVIEW = "overview";

@@ -17,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+
         if(getSupportFragmentManager().findFragmentById(R.id.frag_container) == null){
             getSupportFragmentManager().beginTransaction().replace(R.id.frag_container,new MovieFragment(), "Movie_Fragment").commit();
         }

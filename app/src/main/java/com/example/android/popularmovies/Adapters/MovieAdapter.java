@@ -1,4 +1,4 @@
-package com.example.android.popularmovies;
+package com.example.android.popularmovies.Adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +10,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.example.android.popularmovies.Activities.DetailActivity;
+import com.example.android.popularmovies.Data.MovieContract;
+import com.example.android.popularmovies.GridItem;
+import com.example.android.popularmovies.R;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
@@ -29,15 +32,12 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.Viewholder>{
     public final String BASE_URL = "http://image.tmdb.org/t/p/w500//";
 
 
-    private String KEY = "api_key"; //Do not change this value, key must be defined on strings.xml
     private String RESULTS = "results";
     private String MOVIE_NAME = "title";
     private String MOVIE_IMAGE = "poster_path";
     private String MOVIE_SYNOPSIS = "overview";
     private String MOVIE_RATING = "vote_average";
     private String MOVIE_RELEASE_DATE = "release_date";
-    private String PAGE = "page";
-    private String pageNumber = "";
     private String MOVIE_ID = "id";
 
     public MovieAdapter(Context context, List<GridItem> mGridItemList){
@@ -112,6 +112,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.Viewholder>{
             public void onClick(View view) {
                 Intent intent = new Intent(context,DetailActivity.class);
                 intent.putExtra(MOVIE_NAME,mGridItemList.get(position).getmTitle());
+                intent.putExtra(MovieContract.FavoriteMovies.COLUMN_BACKDROP_PATH,mGridItemList.get(position).getBackdropImageSuffix());
+
                 intent.putExtra(MOVIE_IMAGE,mGridItemList.get(position).getmImageUrlSuffix());
                 intent.putExtra(MOVIE_SYNOPSIS,mGridItemList.get(position).getmOverview());
                 intent.putExtra(MOVIE_RATING, mGridItemList.get(position).getmRating());

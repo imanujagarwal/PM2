@@ -19,67 +19,89 @@
     android:weightSum="1">
 
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
         <ImageView
             android:layout_weight="1"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:scaleType="fitXY"
-            android:layout_height="240dp"
+            android:layout_height="200dp"
             android:id="@+id/imageView_movieArtwork_detail"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="20dp"/>
+            android:layout_marginTop="8dp"/>
+
+    <android.support.v7.widget.CardView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        app:cardCornerRadius="15dp"
+        app:cardBackgroundColor="#FFA767B7"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_height="wrap_content">
 
         <LinearLayout
             android:background="#FFA767B7"
-            android:orientation="vertical"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_marginLeft="8dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
             android:layout_marginTop="20dp"
-            android:layout_height="240dp">
+            android:paddingBottom="20dp"
+            android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/textview_rating_title"
-                android:textSize="24dp"
-                android:textColor="@color/cardview_light_background"
-                android:layout_gravity="center"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/ratingTitle"
-                android:layout_marginTop="24dp"/>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent">
 
-            <TextView
-                android:id="@+id/textview_rating"
-                android:textColor="@color/cardview_light_background"
-                android:layout_gravity="center"
-                android:layout_marginBottom="20dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/textview_rating_title"
+                    android:gravity="center_horizontal"
+                    android:textSize="20sp"
+                    android:textColor="@color/cardview_light_background"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/ratingTitle" />
 
+                <TextView
+                    android:id="@+id/textview_rating"
+                    android:paddingTop="8dp"
+                    android:gravity="center_horizontal"
+                    android:textColor="@color/cardview_light_background"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
 
-            <TextView
-                android:textSize="24dp"
-                android:textColor="@color/cardview_light_background"
-                android:layout_gravity="center"
-                android:id="@+id/textview_release_date_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/releaseDateTitle"/>
+            </LinearLayout>
 
-            <TextView
-                android:layout_gravity="center"
-                android:textColor="@color/cardview_light_background"
-                android:id="@+id/textview_release_date"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:orientation="vertical"
+                android:layout_weight="1"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:textSize="20sp"
+                    android:gravity="center_horizontal"
+                    android:textColor="@color/cardview_light_background"
+                    android:id="@+id/textview_release_date_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/releaseDateTitle"/>
+
+                <TextView
+                    android:paddingTop="8dp"
+                    android:gravity="center_horizontal"
+                    android:textColor="@color/cardview_light_background"
+                    android:id="@+id/textview_release_date"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+
+    </android.support.v7.widget.CardView>
+
+
 
     <TextView
         android:id="@+id/textView_moviename"
@@ -127,75 +149,48 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <android.support.v7.widget.CardView
-        android:id="@+id/trailer_card"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:background="#FFA767B7"
-        app:cardCornerRadius="16dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/trailer_recyclerview"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <LinearLayout
-            android:background="#FFA767B7"
-            android:layout_width="match_parent"
-            android:orientation="horizontal"
-            android:layout_height="wrap_content">
+        android:layout_marginBottom="20dp"
+        android:layout_height="150dp">
 
 
-
-            <ImageView
-                android:id="@+id/trailer1"
-                android:layout_margin="8dp"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="120dp" />
-
-            <ImageView
-                android:id="@+id/trailer2"
-                android:layout_margin="8dp"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="120dp" />
-
-        </LinearLayout>
-
-
-
-        </android.support.v7.widget.CardView>
-
-
+    </android.support.v7.widget.RecyclerView>
 
 
     <TextView
+        android:id="@+id/review_headline"
         android:text="Reviews"
         android:textSize="24sp"
-        android:layout_marginTop="20dp"
         android:layout_marginLeft="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <ScrollView
+    <android.support.v7.widget.RecyclerView
+        android:layout_margin="16dp"
+        android:id="@+id/review_recyclerview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <LinearLayout
-            android:id="@+id/reviews"
-            android:orientation="vertical"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
-            android:layout_marginBottom="15dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+    </android.support.v7.widget.RecyclerView>
 
-        </LinearLayout>
+    <!--<ScrollView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content">-->
 
-    </ScrollView>
+        <!--<LinearLayout-->
+            <!--android:id="@+id/reviews"-->
+            <!--android:orientation="vertical"-->
+            <!--android:layout_marginLeft="16dp"-->
+            <!--android:layout_marginRight="16dp"-->
+            <!--android:layout_marginBottom="15dp"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content">-->
 
+        <!--</LinearLayout>-->
 
-
-
+    <!--</ScrollView>-->
 
 </LinearLayout>
 

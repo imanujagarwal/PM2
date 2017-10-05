@@ -3,27 +3,33 @@ package com.example.android.popularmovies.Activities;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.android.popularmovies.Adapters.ReviewAdapter;
 import com.example.android.popularmovies.Data.MovieContract;
 import com.example.android.popularmovies.R;
+import com.example.android.popularmovies.Adapters.TrailerAdapter;
 import com.squareup.picasso.Picasso;
 import com.example.android.popularmovies.AsyncTask.FetchData;
 
+import java.util.ArrayList;
+
 import static android.view.View.GONE;
-import static java.lang.System.load;
 
 
 /**
@@ -38,9 +44,17 @@ public class DetailActivity extends AppCompatActivity {
     private String MOVIE_RATING = "vote_average";
     private String MOVIE_RELEASE_DATE = "release_date";
     private String MOVIE_ID = "id";
+    private Context c;
     private boolean liked = false;
+    RecyclerView reviewRecyclerView;
+    private static final String RECYCLER_VIEW_POSITION_KEY = "rv_position_key";
+    Parcelable reviewListState;
+
 
     String BASE_URL = "http://image.tmdb.org/t/p/w500//";
+//    @BindView(R.id.trailer_recyclerview)RecycrlerView trailerRecyclerView;
+    ArrayList trailerUrl = new ArrayList();
+    ArrayList<String> reviews = new ArrayList<String>();
 
     @Override
     public void onBackPressed() {
@@ -52,7 +66,12 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.detail_layout);
+//        ButterKnife.bind(this);
 
+        if(savedInstanceState!=null)
+            reviewListState=savedInstanceState.getParcelable(RECYCLER_VIEW_POSITION_KEY);
+
+        c= this;
 
         // Enabling Up / Back navigation
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -63,9 +82,11 @@ public class DetailActivity extends AppCompatActivity {
         final double MovieRating = i.getDoubleExtra(MOVIE_RATING,0);
         final String MovieReleaseDate = i.getStringExtra(MOVIE_RELEASE_DATE);
         final String MovieId = i.getStringExtra(MOVIE_ID);
-        final String ImageSuffix = i.getStringExtra(MOVIE_IMAGE);
-        final String ImageURL = BASE_URL+ImageSuffix;
+        final String ImageSuffix = i.getStringExtra(MovieContract.FavoriteMovies.COLUMN_POSTER_PATH);
+        final String backDropSuffix  = i.getStringExtra(MovieContract.FavoriteMovies.COLUMN_BACKDROP_PATH);
+        final String ImageURL = BASE_URL+backDropSuffix;
         Log.i("TAG", "ImageURL: "+ImageURL);
+
 
         getSupportActionBar().setTitle(MovieName);
 
@@ -75,6 +96,7 @@ public class DetailActivity extends AppCompatActivity {
 
         TrailerResult tr = new TrailerResult();
         tr.execute(MovieId, "videos");
+
 
 
         final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -108,10 +130,10 @@ public class DetailActivity extends AppCompatActivity {
                     liked = false;
 
 
-
                 } else {
                     ContentValues contentValues = new ContentValues();
                     contentValues.put(MovieContract.FavoriteMovies.COLUMN_MOVIE_ID,MovieId);
+                    contentValues.put(MovieContract.FavoriteMovies.COLUMN_BACKDROP_PATH, backDropSuffix);
                     contentValues.put(MOVIE_NAME,MovieName);
                     contentValues.put(MOVIE_SYNOPSIS,MovieSynopsis);
                     contentValues.put(MOVIE_RATING,MovieRating);
@@ -130,17 +152,17 @@ public class DetailActivity extends AppCompatActivity {
                                 Toast.LENGTH_SHORT).show();
                     } else {
                         // Otherwise, the insertion was successful and we can display a toast.
-                        Toast.makeText(getApplicationContext(), "INSERTION DONE SUCCESFULY",
-                                Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getApplicationContext(), "INSERTION DONE SUCCESFULY", Toast.LENGTH_SHORT).show();
                     }
                 }
 
-
-
-
-
             }
         });
+
+
+
+
+
 
 
 
@@ -165,104 +187,40 @@ public class DetailActivity extends AppCompatActivity {
         textView_summary.setText(MovieSynopsis);
 
     }
+    int currentVisiblePosition = 0;
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        currentVisiblePosition = ((LinearLayoutManager)reviewRecyclerView.getLayoutManager()).findFirstCompletelyVisibleItemPosition();
+    }
+
+
 
 
 
     public class TrailerResult extends FetchData {
 
-        public final String BASE_YOUTUBE_URL = "https://m.youtube.com/watch?v=";
-
-
-        public String getTrailerImage(String youtubeId, int image_number){
-            return "https://img.youtube.com/vi/" + youtubeId + "/" + image_number +".jpg" ;
-        }
-
-
         @Override
         protected void onPostExecute(final String[] result) {
+
+
+            for (int i =0; i<result.length ; i++){
+                trailerUrl.add(result[i]);
+            }
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getBaseContext(),LinearLayoutManager.HORIZONTAL,false);
+            TrailerAdapter trailerAdapter = new TrailerAdapter(trailerUrl,c);
+            RecyclerView trailerRecyclerView = (RecyclerView) findViewById(R.id.trailer_recyclerview);
+            trailerRecyclerView.setLayoutManager(linearLayoutManager);
+            trailerRecyclerView.setAdapter(trailerAdapter);
 
             if(result == null)
                 return;
 
-            boolean isYoutubeInstalled = isPackageInstalled("com.google.android.youtube");
-
-            ImageView Trailer1 = (ImageView) findViewById(R.id.trailer1);
-
-
-
-
-            if (result.length >0) {
-
-                Picasso.with(getApplicationContext())
-                        .load(getTrailerImage(result[0],2))
-                        .placeholder(R.drawable.placeholder)
-                        .fit()
-                        .into(Trailer1);
-
-                if(isYoutubeInstalled){
-                    Trailer1.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Intent intent = new Intent();
-                            intent.setAction(Intent.ACTION_VIEW);
-                            intent.setData(Uri.parse(BASE_YOUTUBE_URL + result[0]));
-                            intent.setPackage("com.google.android.youtube");
-                            startActivity(intent);
-                        }
-                    });
-                }else {
-                    Trailer1.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Intent intent = new Intent(getBaseContext(),WebViewActivity.class);
-                            intent.putExtra("youtubeUrl",BASE_YOUTUBE_URL + result[0]);
-                            startActivity(intent);
-                        }
-                    });
-
-                }
-
-            } else{
-                findViewById(R.id.trailer_card).setVisibility(GONE);
+            if(result.length < 1)
                 findViewById(R.id.trailer_headline).setVisibility(GONE);
-                //                Trailer1.setText("No trailers available for the movie");
-            }
 
-            ImageView Trailer2 = (ImageView) findViewById(R.id.trailer2);
-
-
-            if (result.length >= 2) {
-                Picasso.with(getApplicationContext())
-                        .load(getTrailerImage(result[1],2))
-                        .fit()
-                        .placeholder(R.drawable.placeholder)
-                        .into(Trailer2);
-
-                if(isYoutubeInstalled){
-                    Trailer2.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Intent intent = new Intent();
-                            intent.setAction(Intent.ACTION_VIEW);
-                            intent.setData(Uri.parse(BASE_YOUTUBE_URL + result[1]));
-                            intent.setPackage("com.google.android.youtube");
-                            startActivity(intent);
-                        }
-                    });
-                } else {
-                    Trailer2.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Intent intent = new Intent(getBaseContext(),WebViewActivity.class);
-                            intent.putExtra("youtubeUrl",BASE_YOUTUBE_URL + result[1]);
-                            startActivity(intent);
-                        }
-                    });
-                }
-
-            } else{
-                Trailer2.setVisibility(GONE);
-            }
         }
     }
 
@@ -271,65 +229,24 @@ public class DetailActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(final String[] result) {
 
-            LinearLayout ll = (LinearLayout)findViewById(R.id.reviews);
-
-            if(result == null || result.length == 0){
-                TextView tv = new TextView(getApplicationContext());
-                tv.setText("No reviews for this movie available");
-                tv.setTextSize(15);
-                tv.setTextColor(getResources().getColor(R.color.grey));
-                ll.addView(tv);
-                return;
+            for (int i =0; i<result.length ; i++){
+                reviews.add(result[i]);
             }
+            if(reviews.size() < 1){
+                findViewById(R.id.review_recyclerview).setVisibility(View.GONE);
+                findViewById(R.id.review_headline).setVisibility(View.GONE);
+            }
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getBaseContext(),LinearLayoutManager.VERTICAL,false);
+            ReviewAdapter reviewAdapter = new ReviewAdapter(reviews,c);
+            reviewRecyclerView = (RecyclerView) findViewById(R.id.review_recyclerview);
+            reviewRecyclerView.setNestedScrollingEnabled(false);
+            reviewRecyclerView.setLayoutManager(linearLayoutManager);
+            reviewRecyclerView.setAdapter(reviewAdapter);
+            ((LinearLayoutManager) reviewRecyclerView.getLayoutManager()).scrollToPosition(currentVisiblePosition);
 
-            for (int i=0;i<result.length;i++){
-                CardView card = new CardView(getBaseContext());
 
-                LinearLayout.LayoutParams params =
-                        new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT);
-
-                params.setMargins(0,16,0,16);
-
-                card.setLayoutParams(params);
-
-                // Set CardView corner radius
-                card.setRadius(16);
-
-                // Set cardView content padding
-                card.setContentPadding(15, 15, 15, 15);
-
-                // Set a background color for CardView
-                card.setCardBackgroundColor(Color.parseColor("#FFA767B7"));
-
-                // Set the CardView maximum elevation
-                card.setMaxCardElevation(15);
-
-                // Set CardView elevation
-                card.setCardElevation(9);
-
-                TextView tv = new TextView(getBaseContext());
-                tv.setPadding(16,16,16,16);
-                tv.setText(result[i]);
-                tv.setTextSize(15);
-                tv.setTextColor(getResources().getColor(R.color.cardview_light_background));
-
-                card.addView(tv);
-
-                ll.addView(card);
         }
-    }
 
-    }
-
-    private boolean isPackageInstalled(String packagename) {
-        try {
-//            packageManager.getPackageInfo(packagename, PackageManager.GET_ACTIVITIES);
-            this.getPackageManager().getPackageInfo(packagename,0);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
 }

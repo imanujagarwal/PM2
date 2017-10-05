@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">PopularMovies</string>
 
-    <string name="api_key">PlaceYourKeyHere</string>
+    <string name="api_key"></string>
 
     <string name="movie_detail">Movie Detail</string>
 

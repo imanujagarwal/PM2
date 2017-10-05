@@ -34,6 +34,7 @@ public class MovieDbHelper extends SQLiteOpenHelper {
                 MovieContract.FavoriteMovies.COLUMN_TOP_RATED_INDEX + " INTEGER, " +
                 MovieContract.FavoriteMovies.COLUMN_OVERVIEW + " TEXT , " +
                 MovieContract.FavoriteMovies.COLUMN_POSTER_PATH + " TEXT , " +
+                FavoriteMovies.COLUMN_BACKDROP_PATH + " TEXT , "+
                 MovieContract.FavoriteMovies.COLUMN_RELEASE_DATE + " TEXT, " +
                 MovieContract.FavoriteMovies.COLUMN_RUNTIME + " TEXT, " +
                 MovieContract.FavoriteMovies.COLUMN_TITLE + " TEXT , " +
