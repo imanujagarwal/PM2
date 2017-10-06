@@ -270,6 +270,7 @@ public class MovieFragment extends Fragment {
             gridItemList.add(new GridItem(backdropPath,posterPath,name,synopsis,rating,releaseDate,movieId));
         }while (cursor.moveToNext());
         movieAdapter.notifyDataSetChanged();
+        recyclerview.getLayoutManager().onRestoreInstanceState(listState);
         view.findViewById(R.id.loading_indicator).setVisibility(View.GONE);
 
     }

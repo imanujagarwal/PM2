@@ -48,7 +48,7 @@ public class DetailActivity extends AppCompatActivity {
     private boolean liked = false;
     RecyclerView reviewRecyclerView;
     private static final String RECYCLER_VIEW_POSITION_KEY = "rv_position_key";
-    Parcelable reviewListState;
+    Parcelable savedRecyclerLayoutState;
 
 
     String BASE_URL = "http://image.tmdb.org/t/p/w500//";
@@ -68,8 +68,9 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.detail_layout);
 //        ButterKnife.bind(this);
 
-        if(savedInstanceState!=null)
-            reviewListState=savedInstanceState.getParcelable(RECYCLER_VIEW_POSITION_KEY);
+        if(savedInstanceState!=null){
+            savedRecyclerLayoutState = savedInstanceState.getParcelable(RECYCLER_VIEW_POSITION_KEY);
+        }
 
         c= this;
 
@@ -189,11 +190,12 @@ public class DetailActivity extends AppCompatActivity {
     }
     int currentVisiblePosition = 0;
 
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        currentVisiblePosition = ((LinearLayoutManager)reviewRecyclerView.getLayoutManager()).findFirstCompletelyVisibleItemPosition();
+        outState.putParcelable(RECYCLER_VIEW_POSITION_KEY, reviewRecyclerView.getLayoutManager().onSaveInstanceState());
     }
 
 
@@ -242,7 +244,7 @@ public class DetailActivity extends AppCompatActivity {
             reviewRecyclerView.setNestedScrollingEnabled(false);
             reviewRecyclerView.setLayoutManager(linearLayoutManager);
             reviewRecyclerView.setAdapter(reviewAdapter);
-            ((LinearLayoutManager) reviewRecyclerView.getLayoutManager()).scrollToPosition(currentVisiblePosition);
+            reviewRecyclerView.getLayoutManager().onRestoreInstanceState(savedRecyclerLayoutState);
 
 
         }
