@@ -4,6 +4,10 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.example.android.popularmovies.Activities.DetailActivity;
+import com.example.android.popularmovies.R;
+import com.example.android.popularmovies.Utilities;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,7 +76,7 @@ public class FetchData extends AsyncTask<String, Void, String[]> {
                     .buildUpon()
                     .appendPath(params[0])
                     .appendPath(params[1])
-                    .appendQueryParameter("api_key", "53d98135d7f42edb438296342d6f55d1")
+                    .appendQueryParameter("api_key", Utilities.getAppContext().getString(R.string.api_key))
                     .build();
 
             URL url = new URL(buildUri.toString());

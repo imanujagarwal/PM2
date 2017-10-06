@@ -11,6 +11,7 @@ import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import com.example.android.popularmovies.R;
+import com.example.android.popularmovies.Utilities;
 
 /**
  * Created by anuj on 3/10/17.
@@ -28,6 +29,7 @@ public class WebViewActivity extends AppCompatActivity {
         setContentView(R.layout.youtube_web_view);
 
         getSupportActionBar().hide();
+        Utilities.setContext(this);
 
         String articleUrl = getIntent().getStringExtra("youtubeUrl");
 

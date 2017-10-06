@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -24,6 +26,7 @@ import com.example.android.popularmovies.Adapters.ReviewAdapter;
 import com.example.android.popularmovies.Data.MovieContract;
 import com.example.android.popularmovies.R;
 import com.example.android.popularmovies.Adapters.TrailerAdapter;
+import com.example.android.popularmovies.Utilities;
 import com.squareup.picasso.Picasso;
 import com.example.android.popularmovies.AsyncTask.FetchData;
 
@@ -44,8 +47,8 @@ public class DetailActivity extends AppCompatActivity {
     private String MOVIE_RATING = "vote_average";
     private String MOVIE_RELEASE_DATE = "release_date";
     private String MOVIE_ID = "id";
-    private Context c;
     private boolean liked = false;
+    private static Context applicationContext;
     RecyclerView reviewRecyclerView;
     private static final String RECYCLER_VIEW_POSITION_KEY = "rv_position_key";
     Parcelable savedRecyclerLayoutState;
@@ -62,6 +65,8 @@ public class DetailActivity extends AppCompatActivity {
 
     }
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,7 +77,11 @@ public class DetailActivity extends AppCompatActivity {
             savedRecyclerLayoutState = savedInstanceState.getParcelable(RECYCLER_VIEW_POSITION_KEY);
         }
 
-        c= this;
+        Utilities.setContext(this);
+
+        if(!Utilities.haveNetworkConnection()){
+            Toast.makeText(this,"NO INTERNET CONNECTION \nPlease connect to Internet to properly load the data",Toast.LENGTH_LONG).show();
+        }
 
         // Enabling Up / Back navigation
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -207,21 +216,23 @@ public class DetailActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(final String[] result) {
 
+            if(result!=null){
+                for (int i =0; i<result.length ; i++){
+                    trailerUrl.add(result[i]);
+                }
+                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getBaseContext(),LinearLayoutManager.HORIZONTAL,false);
+                TrailerAdapter trailerAdapter = new TrailerAdapter(trailerUrl,Utilities.getContext());
+                RecyclerView trailerRecyclerView = (RecyclerView) findViewById(R.id.trailer_recyclerview);
+                trailerRecyclerView.setLayoutManager(linearLayoutManager);
+                trailerRecyclerView.setAdapter(trailerAdapter);
 
-            for (int i =0; i<result.length ; i++){
-                trailerUrl.add(result[i]);
+                if(result == null)
+                    return;
+
+                if(result.length < 1)
+                    findViewById(R.id.trailer_headline).setVisibility(GONE);
             }
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getBaseContext(),LinearLayoutManager.HORIZONTAL,false);
-            TrailerAdapter trailerAdapter = new TrailerAdapter(trailerUrl,c);
-            RecyclerView trailerRecyclerView = (RecyclerView) findViewById(R.id.trailer_recyclerview);
-            trailerRecyclerView.setLayoutManager(linearLayoutManager);
-            trailerRecyclerView.setAdapter(trailerAdapter);
 
-            if(result == null)
-                return;
-
-            if(result.length < 1)
-                findViewById(R.id.trailer_headline).setVisibility(GONE);
 
         }
     }
@@ -231,20 +242,24 @@ public class DetailActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(final String[] result) {
 
-            for (int i =0; i<result.length ; i++){
-                reviews.add(result[i]);
+            if(result!=null){
+
+                for (int i =0; i<result.length ; i++){
+                    reviews.add(result[i]);
+                }
+                if(reviews.size() < 1){
+                    findViewById(R.id.review_recyclerview).setVisibility(View.GONE);
+                    findViewById(R.id.review_headline).setVisibility(View.GONE);
+                }
+                LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getBaseContext(),LinearLayoutManager.VERTICAL,false);
+                ReviewAdapter reviewAdapter = new ReviewAdapter(reviews,Utilities.getContext());
+                reviewRecyclerView = (RecyclerView) findViewById(R.id.review_recyclerview);
+                reviewRecyclerView.setNestedScrollingEnabled(false);
+                reviewRecyclerView.setLayoutManager(linearLayoutManager);
+                reviewRecyclerView.setAdapter(reviewAdapter);
+                reviewRecyclerView.getLayoutManager().onRestoreInstanceState(savedRecyclerLayoutState);
             }
-            if(reviews.size() < 1){
-                findViewById(R.id.review_recyclerview).setVisibility(View.GONE);
-                findViewById(R.id.review_headline).setVisibility(View.GONE);
-            }
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getBaseContext(),LinearLayoutManager.VERTICAL,false);
-            ReviewAdapter reviewAdapter = new ReviewAdapter(reviews,c);
-            reviewRecyclerView = (RecyclerView) findViewById(R.id.review_recyclerview);
-            reviewRecyclerView.setNestedScrollingEnabled(false);
-            reviewRecyclerView.setLayoutManager(linearLayoutManager);
-            reviewRecyclerView.setAdapter(reviewAdapter);
-            reviewRecyclerView.getLayoutManager().onRestoreInstanceState(savedRecyclerLayoutState);
+
 
 
         }

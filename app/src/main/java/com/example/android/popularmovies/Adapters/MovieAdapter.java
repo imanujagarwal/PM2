@@ -103,7 +103,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.Viewholder>{
                 .load(Url)
                 .placeholder(R.mipmap.placeholder)
                 .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-                .error(R.drawable.error2)
+                .error(R.mipmap.placeholder)
                 .fit()
                 .into(holder.moviePoster);
 
